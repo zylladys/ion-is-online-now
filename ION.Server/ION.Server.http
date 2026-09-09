@@ -1,0 +1,6 @@
+@ION.Server_HostAddress = http://localhost:5022
+
+GET {{ION.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ION.App/ION.App.csproj" />
+  <Project Path="ION.Core/ION.Core.csproj" />
+  <Project Path="ION.Server/ION.Server.csproj" />
+</Solution>
