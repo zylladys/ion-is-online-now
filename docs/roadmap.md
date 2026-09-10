@@ -14,21 +14,21 @@ The roadmap prioritizes building a stable cross-platform foundation before expan
 * [x] Define initial architecture
 * [x] Define streaming platform priorities
 * [x] Define Android, Windows and Discord as notification targets
-* [ ] Create Git repository
-* [ ] Create GitHub repository
-* [ ] Create .NET solution
-* [ ] Create ION.App
-* [ ] Create ION.Core
-* [ ] Create ION.Server
-* [ ] Reference ION.Core from App and Server
+* [x] Create Git repository
+* [x] Create GitHub repository
+* [x] Create .NET solution
+* [x] Create ION.App
+* [x] Create ION.Core
+* [x] Create ION.Server
+* [x] Reference ION.Core from App and Server
 * [ ] Add `.gitignore`
 * [ ] Add `.editorconfig`
 * [x] Add README
 * [x] Add architecture documentation
 * [x] Add roadmap
-* [ ] Build entire solution successfully
-* [ ] Create initial Git commit
-* [ ] Push initial repository to GitHub
+* [x] Build entire solution successfully
+* [x] Create initial Git commit
+* [x] Push initial repository to GitHub
 
 ---
 
@@ -40,10 +40,10 @@ The roadmap prioritizes building a stable cross-platform foundation before expan
 * [ ] Display ION branding
 * [ ] Implement offline logo state
 * [ ] Implement online logo state
-* [ ] Run ION.App on Windows
-* [ ] Configure Android emulator
-* [ ] Run ION.App on Android emulator
-* [ ] Test ION.App on a physical Android device
+* [x] Run ION.App on Windows
+* [x] Configure Android emulator
+* [x] Run ION.App on Android emulator
+* [x] Test ION.App on a physical Android device
 
 Expected result:
 

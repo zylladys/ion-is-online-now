@@ -1,4 +1,6 @@
-﻿namespace ION.App;
+﻿using ION.App.Pages;
+
+namespace ION.App;
 
 public partial class MainPage : ContentPage
 {
@@ -7,12 +9,8 @@ public partial class MainPage : ContentPage
         InitializeComponent();
     }
 
-    [Obsolete]
     private async void OnAddChannelClicked(object sender, EventArgs e)
     {
-        await DisplayAlert(
-            "ION",
-            "Channel configuration is coming next.",
-            "OK");
+        await Shell.Current.GoToAsync(nameof(AddChannelPage));
     }
 }

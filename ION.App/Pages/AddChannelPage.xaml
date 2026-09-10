@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="ION.App.Pages.AddChannelPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Add Channel"
+    BackgroundColor="#101114">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="28"
+            Spacing="22">
+
+            <VerticalStackLayout Spacing="4">
+
+                <Label
+                    Text="ADD CHANNEL"
+                    FontSize="24"
+                    FontAttributes="Bold"
+                    TextColor="White" />
+
+                <Label
+                    Text="Paste a livestream channel URL."
+                    FontSize="14"
+                    TextColor="#8F96A3" />
+
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+
+                <Label
+                    Text="CHANNEL"
+                    FontSize="12"
+                    FontAttributes="Bold"
+                    CharacterSpacing="2"
+                    TextColor="#8F96A3" />
+
+                <Border
+                    BackgroundColor="#17191E"
+                    Stroke="#2A2D34"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 14"
+                    Padding="14,4">
+
+                    <Entry
+                        x:Name="ChannelEntry"
+                        Placeholder="https://twitch.tv/channel"
+                        PlaceholderColor="#626873"
+                        TextColor="White"
+                        BackgroundColor="Transparent"
+                        ClearButtonVisibility="WhileEditing"
+                        TextChanged="OnChannelTextChanged" />
+
+                </Border>
+
+            </VerticalStackLayout>
+
+            <Border
+                x:Name="PlatformPanel"
+                IsVisible="False"
+                Padding="16"
+                BackgroundColor="#17191E"
+                Stroke="#2A2D34"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 14">
+
+                <HorizontalStackLayout Spacing="12">
+
+                    <Label
+                        x:Name="PlatformIndicator"
+                        Text="●"
+                        FontSize="18"
+                        TextColor="#8F96A3"
+                        VerticalOptions="Center" />
+
+                    <VerticalStackLayout Spacing="2">
+
+                        <Label
+                            Text="PLATFORM DETECTED"
+                            FontSize="10"
+                            CharacterSpacing="1.5"
+                            TextColor="#8F96A3" />
+
+                        <Label
+                            x:Name="PlatformLabel"
+                            Text="Unknown"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="White" />
+
+                    </VerticalStackLayout>
+
+                </HorizontalStackLayout>
+
+            </Border>
+
+            <Button
+                x:Name="AddButton"
+                Text="Add Channel"
+                HeightRequest="52"
+                CornerRadius="14"
+                IsEnabled="False"
+                BackgroundColor="#E9435B"
+                TextColor="White"
+                FontAttributes="Bold"
+                Clicked="OnAddClicked" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>
