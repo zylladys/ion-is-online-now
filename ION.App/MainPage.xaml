@@ -95,33 +95,39 @@
                     CharacterSpacing="2"
                     TextColor="#8F96A3" />
 
-                <Border
-                    Padding="24"
-                    BackgroundColor="#17191E"
-                    Stroke="#2A2D34"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout
+                    x:Name="ChannelsContainer"
+                    Spacing="10">
 
-                    <VerticalStackLayout
-                        Spacing="8"
-                        HorizontalOptions="Center">
+                    <Border
+                        Padding="24"
+                        BackgroundColor="#17191E"
+                        Stroke="#2A2D34"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 16">
 
-                        <Label
-                            Text="No channels configured"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            TextColor="White"
-                            HorizontalTextAlignment="Center" />
+                        <VerticalStackLayout
+                            Spacing="8"
+                            HorizontalOptions="Center">
 
-                        <Label
-                            Text="Add a livestream channel to start monitoring it."
-                            FontSize="13"
-                            TextColor="#8F96A3"
-                            HorizontalTextAlignment="Center" />
+                            <Label
+                                Text="No channels configured"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                TextColor="White"
+                                HorizontalTextAlignment="Center" />
 
-                    </VerticalStackLayout>
+                            <Label
+                                Text="Add a livestream channel to start monitoring it."
+                                FontSize="13"
+                                TextColor="#8F96A3"
+                                HorizontalTextAlignment="Center" />
 
-                </Border>
+                        </VerticalStackLayout>
+
+                    </Border>
+
+                </VerticalStackLayout>
 
             </VerticalStackLayout>
 

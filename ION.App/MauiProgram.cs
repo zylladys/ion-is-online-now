@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using ION.Core.Services;
+
 namespace ION.App;
 
 public static class MauiProgram
@@ -15,10 +17,13 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-#if DEBUG
-		builder.Logging.AddDebug();
-#endif
+        ChannelStore.Initialize(
+            FileSystem.AppDataDirectory
+            );
 
-		return builder.Build();
+#if DEBUG
+        builder.Logging.AddDebug();
+#endif
+        return builder.Build();
 	}
 }

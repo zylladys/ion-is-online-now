@@ -1,48 +1,66 @@
-﻿using ION.Core.Models;
-using ION.Core.Platforms;
+﻿using ION.Core.Platforms;
+using ION.Core.Services;
 
 namespace ION.App.Pages;
 
 public partial class AddChannelPage : ContentPage
 {
-    private StreamingPlatform _detectedPlatform = StreamingPlatform.Unknown;
+    private StreamingPlatform _detectedPlatform =
+        StreamingPlatform.Unknown;
 
     public AddChannelPage()
     {
         InitializeComponent();
     }
 
-    private void OnChannelTextChanged(object sender, TextChangedEventArgs e)
+    private void OnChannelTextChanged(
+        object? sender,
+        TextChangedEventArgs e)
     {
-        _detectedPlatform = PlatformDetector.Detect(e.NewTextValue);
+        _detectedPlatform =
+            PlatformDetector.Detect(e.NewTextValue);
 
-        PlatformPanel.IsVisible = !string.IsNullOrWhiteSpace(e.NewTextValue);
+        PlatformPanel.IsVisible =
+            !string.IsNullOrWhiteSpace(e.NewTextValue);
 
         if (_detectedPlatform == StreamingPlatform.Unknown)
         {
             PlatformLabel.Text = "Unknown platform";
-            PlatformIndicator.TextColor = Color.FromArgb("#8F96A3");
+            PlatformIndicator.TextColor =
+                Color.FromArgb("#8F96A3");
+
             AddButton.IsEnabled = false;
             return;
         }
 
-        PlatformLabel.Text = _detectedPlatform.ToString();
-        PlatformIndicator.TextColor = Color.FromArgb("#E9435B");
+        PlatformLabel.Text =
+            _detectedPlatform.ToString();
+
+        PlatformIndicator.TextColor =
+            Color.FromArgb("#E9435B");
+
         AddButton.IsEnabled = true;
     }
 
-    [Obsolete]
-    private async void OnAddClicked(object sender, EventArgs e)
+    private async void OnAddClicked(
+        object? sender,
+        EventArgs e)
     {
-        var channel = new StreamChannel
-        {
-            Input = ChannelEntry.Text?.Trim() ?? string.Empty,
-            Platform = _detectedPlatform
-        };
+        var channel =
+            ChannelInputParser.Parse(ChannelEntry.Text ?? "");
 
-        await DisplayAlert(
-            "Channel detected",
-            $"Platform: {channel.Platform}\nInput: {channel.Input}",
-            "OK");
+        if (channel is null)
+        {
+            await DisplayAlert(
+                "Invalid channel",
+                "ION could not understand this channel address.",
+                "OK");
+
+            return;
+        }
+
+        await ChannelStore.AddAsync(channel);
+
+        await Shell.Current.GoToAsync("..");
     }
 }
