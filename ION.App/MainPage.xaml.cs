@@ -8,7 +8,7 @@ public partial class MainPage : ContentPage
 {
     public MainPage()
     {
-        InitializeComponent();
+        InitializeComponent();            
     }
 
     protected override void OnAppearing()
@@ -16,6 +16,57 @@ public partial class MainPage : ContentPage
         base.OnAppearing();
 
         RefreshChannels();
+    }
+
+    private bool _testIsOnline;
+
+    private void OnLogoStatusTapped(
+    object? sender,
+    TappedEventArgs e)
+    {
+        _testIsOnline = !_testIsOnline;
+
+        UpdateGlobalStatus(_testIsOnline);
+    }
+
+    private void UpdateGlobalStatus(bool isOnline)
+    {
+        if (isOnline)
+        {
+            LogoStatusLabel.Text = "●";
+            LogoStatusLabel.TextColor =
+                Color.FromArgb("#E9435B");
+
+            LogoStatusIndicator.BackgroundColor =
+                Color.FromArgb("#20E9435B");
+
+            GlobalStatusIndicator.Text = "●";
+            GlobalStatusIndicator.TextColor =
+                Color.FromArgb("#E9435B");
+
+            GlobalStatusTitle.Text = "ONLINE";
+
+            GlobalStatusDescription.Text =
+                "A monitored channel is live right now";
+        }
+        else
+        {
+            LogoStatusLabel.Text = "○";
+            LogoStatusLabel.TextColor =
+                Color.FromArgb("#7D8490");
+
+            LogoStatusIndicator.BackgroundColor =
+                Colors.Transparent;
+
+            GlobalStatusIndicator.Text = "○";
+            GlobalStatusIndicator.TextColor =
+                Color.FromArgb("#7D8490");
+
+            GlobalStatusTitle.Text = "OFFLINE";
+
+            GlobalStatusDescription.Text =
+                "No channels are live right now";
+        }
     }
 
     private void RefreshChannels()

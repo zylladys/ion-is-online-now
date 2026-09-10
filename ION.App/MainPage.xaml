@@ -25,11 +25,31 @@
                         FontAttributes="Bold"
                         TextColor="White" />
 
-                    <Label
-                        Text="○"
-                        FontSize="64"
-                        FontAttributes="Bold"
-                        TextColor="#7D8490" />
+                    <Border
+                        x:Name="LogoStatusIndicator"
+                        WidthRequest="58"
+                        HeightRequest="58"
+                        Padding="0"
+                        BackgroundColor="Transparent"
+                        Stroke="Transparent"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 29">
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Tapped="OnLogoStatusTapped" />
+                        </Border.GestureRecognizers>
+
+                        <Label
+                            x:Name="LogoStatusLabel"
+                            Text="○"
+                            FontSize="64"
+                            FontAttributes="Bold"
+                            TextColor="#7D8490"
+                            HorizontalTextAlignment="Center"
+                            VerticalTextAlignment="Center" />
+
+                    </Border>
 
                     <Label
                         Text="N"
@@ -59,6 +79,7 @@
                     Spacing="12">
 
                     <Label
+                        x:Name="GlobalStatusIndicator"
                         Text="○"
                         FontSize="22"
                         TextColor="#7D8490"
@@ -69,12 +90,14 @@
                         VerticalOptions="Center">
 
                         <Label
+                            x:Name="GlobalStatusTitle"
                             Text="OFFLINE"
                             FontSize="16"
                             FontAttributes="Bold"
                             TextColor="White" />
 
                         <Label
+                            x:Name="GlobalStatusDescription"
                             Text="No channels are live right now"
                             FontSize="12"
                             TextColor="#8F96A3" />
