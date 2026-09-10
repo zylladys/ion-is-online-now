@@ -51,7 +51,7 @@ public partial class AddChannelPage : ContentPage
 
         if (channel is null)
         {
-            await DisplayAlert(
+            await DisplayAlertAsync(
                 "Invalid channel",
                 "ION could not understand this channel address.",
                 "OK");

@@ -108,16 +108,62 @@ public partial class MainPage : ContentPage
             TextColor = Color.FromArgb("#8F96A3")
         };
 
-        var info = new VerticalStackLayout
+        var openButton = new Button
+        {
+            Text = "Open Stream",
+            HeightRequest = 42,
+            CornerRadius = 12,
+            BackgroundColor = Color.FromArgb("#252831"),
+            TextColor = Colors.White,
+            FontAttributes = FontAttributes.Bold
+        };
+
+        openButton.Clicked += async (_, _) =>
+        {
+            await OpenChannelAsync(channel);
+        };
+
+        var removeButton = new Button
+        {
+            Text = "Remove",
+            HeightRequest = 42,
+            CornerRadius = 12,
+            BackgroundColor = Color.FromArgb("#351C22"),
+            TextColor = Color.FromArgb("#E9435B"),
+            FontAttributes = FontAttributes.Bold
+        };
+
+        removeButton.Clicked += async (_, _) =>
+        {
+            await RemoveChannelAsync(channel);
+        };
+
+        var actions = new Grid
+        {
+            ColumnSpacing = 10,
+            Margin = new Thickness(0, 12, 0, 0),
+
+            ColumnDefinitions =
+        {
+            new ColumnDefinition(GridLength.Star),
+            new ColumnDefinition(GridLength.Star)
+        }
+        };
+
+        actions.Add(openButton, 0, 0);
+        actions.Add(removeButton, 1, 0);
+
+        var content = new VerticalStackLayout
         {
             Spacing = 3,
 
             Children =
-            {
-                platform,
-                name,
-                status
-            }
+        {
+            platform,
+            name,
+            status,
+            actions
+        }
         };
 
         return new Border
@@ -126,13 +172,61 @@ public partial class MainPage : ContentPage
             BackgroundColor = Color.FromArgb("#17191E"),
             Stroke = Color.FromArgb("#2A2D34"),
             StrokeThickness = 1,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
-            {
-                CornerRadius = 16
-            },
 
-            Content = info
+            StrokeShape =
+                new Microsoft.Maui.Controls.Shapes.RoundRectangle
+                {
+                    CornerRadius = 16
+                },
+
+            Content = content
         };
+    }
+
+    private async Task OpenChannelAsync(StreamChannel channel)
+    {
+        if (string.IsNullOrWhiteSpace(channel.ChannelUrl))
+            return;
+
+        try
+        {
+            var uri = new Uri(channel.ChannelUrl);
+
+            var opened = await Browser.Default.OpenAsync(
+                uri,
+                BrowserLaunchMode.SystemPreferred);
+
+            if (!opened)
+            {
+                await DisplayAlertAsync(
+                    "Could not open stream",
+                    "ION could not open this channel.",
+                    "OK");
+            }
+        }
+        catch
+        {
+            await DisplayAlertAsync(
+                "Could not open stream",
+                "ION could not open this channel.",
+                "OK");
+        }
+    }
+
+    private async Task RemoveChannelAsync(StreamChannel channel)
+    {
+        var confirmed = await DisplayAlertAsync(
+            "Remove channel?",
+            $"Stop monitoring {channel.DisplayName}?",
+            "Remove",
+            "Cancel");
+
+        if (!confirmed)
+            return;
+
+        await ChannelStore.RemoveAsync(channel.Id);
+
+        RefreshChannels();
     }
 
     private async void OnAddChannelClicked(
