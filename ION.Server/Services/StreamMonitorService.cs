@@ -7,32 +7,45 @@ namespace ION.Server.Services;
 public class StreamMonitorService : BackgroundService
 {
     private readonly TwitchService _twitchService;
+    private readonly ServerChannelStore _channelStore;
+    private readonly LiveEventDispatcher _liveEventDispatcher;
     private readonly ILogger<StreamMonitorService> _logger;
 
-    private readonly LiveEventDispatcher _liveEventDispatcher;
+    private readonly int _intervalSeconds;
 
-    private readonly Dictionary<string, bool> _lastKnownStates =
-        new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<Guid, bool> _lastKnownStates = [];
 
-    private readonly ServerChannelStore _channelStore;
+    private sealed record ChannelCheckResult(
+        Guid ChannelId,
+        StreamStatus Status);
 
     public StreamMonitorService(
-    TwitchService twitchService,
-    ServerChannelStore channelStore,
-    LiveEventDispatcher liveEventDispatcher,
-    ILogger<StreamMonitorService> logger)
+        TwitchService twitchService,
+        ServerChannelStore channelStore,
+        LiveEventDispatcher liveEventDispatcher,
+        IConfiguration configuration,
+        ILogger<StreamMonitorService> logger)
     {
         _twitchService = twitchService;
         _channelStore = channelStore;
         _liveEventDispatcher = liveEventDispatcher;
         _logger = logger;
+
+        _intervalSeconds =
+            configuration.GetValue<int?>(
+                "Monitoring:IntervalSeconds")
+            ?? 60;
+
+        if (_intervalSeconds <= 0)
+            _intervalSeconds = 60;
     }
 
     protected override async Task ExecuteAsync(
         CancellationToken stoppingToken)
     {
         _logger.LogInformation(
-            "ION Stream Monitor started.");
+            "ION Stream Monitor started. Polling interval: {IntervalSeconds}s.",
+            _intervalSeconds);
 
         // Establish the initial state without generating
         // a false OFFLINE -> LIVE event.
@@ -42,7 +55,7 @@ public class StreamMonitorService : BackgroundService
 
         using var timer =
             new PeriodicTimer(
-                TimeSpan.FromSeconds(10));
+                TimeSpan.FromSeconds(_intervalSeconds));
 
         try
         {
@@ -68,7 +81,7 @@ public class StreamMonitorService : BackgroundService
         CancellationToken cancellationToken)
     {
         var channels =
-    await _channelStore.GetAllAsync();
+            await _channelStore.GetAllAsync();
 
         var twitchChannels =
             channels
@@ -77,23 +90,26 @@ public class StreamMonitorService : BackgroundService
                 .ToList();
 
         var tasks =
-    twitchChannels.Select(
-        channel =>
-            CheckChannelAsync(
-                channel,
-                cancellationToken));
+            twitchChannels.Select(
+                channel =>
+                    CheckChannelAsync(
+                        channel,
+                        cancellationToken));
 
         var results =
             await Task.WhenAll(tasks);
 
-        foreach (var status in results)
+        foreach (var result in results)
         {
-            if (status is null)
+            if (result is null)
                 continue;
+
+            var status = result.Status;
+            var channelId = result.ChannelId;
 
             if (detectTransitions &&
                 _lastKnownStates.TryGetValue(
-                    status.Username,
+                    channelId,
                     out var wasLive))
             {
                 if (!wasLive && status.IsLive)
@@ -101,7 +117,9 @@ public class StreamMonitorService : BackgroundService
                     var liveEvent =
                         CreateLiveEvent(status);
 
-                    await OnChannelWentLiveAsync(liveEvent,cancellationToken);
+                    await OnChannelWentLiveAsync(
+                        liveEvent,
+                        cancellationToken);
                 }
 
                 if (wasLive && !status.IsLive)
@@ -115,13 +133,33 @@ public class StreamMonitorService : BackgroundService
                 }
             }
 
-            _lastKnownStates[status.Username] =
+            _lastKnownStates[channelId] =
                 status.IsLive;
         }
+
+        RemoveStaleChannelStates(channels);
+    }
+
+    private void RemoveStaleChannelStates(
+        IReadOnlyCollection<StreamChannel> channels)
+    {
+        var activeChannelIds =
+            channels
+                .Select(x => x.Id)
+                .ToHashSet();
+
+        var staleChannelIds =
+            _lastKnownStates.Keys
+                .Where(id =>
+                    !activeChannelIds.Contains(id))
+                .ToList();
+
+        foreach (var channelId in staleChannelIds)
+            _lastKnownStates.Remove(channelId);
     }
 
     private OfflineEvent CreateOfflineEvent(
-    StreamStatus status)
+        StreamStatus status)
     {
         return new OfflineEvent
         {
@@ -141,8 +179,8 @@ public class StreamMonitorService : BackgroundService
     }
 
     private async Task OnChannelWentOfflineAsync(
-    OfflineEvent offlineEvent,
-    CancellationToken cancellationToken)
+        OfflineEvent offlineEvent,
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "⚫ OFFLINE EVENT: {Platform}/{Username}",
@@ -155,7 +193,7 @@ public class StreamMonitorService : BackgroundService
     }
 
     private LiveEvent CreateLiveEvent(
-    StreamStatus status)
+        StreamStatus status)
     {
         return new LiveEvent
         {
@@ -187,22 +225,22 @@ public class StreamMonitorService : BackgroundService
     }
 
     private async Task OnChannelWentLiveAsync(
-    LiveEvent liveEvent,
-    CancellationToken cancellationToken)
+        LiveEvent liveEvent,
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             """
-        🔴 LIVE EVENT
-        Platform: {Platform}
-        Channel: {DisplayName}
-        Username: {Username}
-        Game: {GameName}
-        Title: {Title}
-        Viewers: {ViewerCount}
-        URL: {ChannelUrl}
-        StartedAt: {StartedAt}
-        DetectedAt: {DetectedAt}
-        """,
+            🔴 LIVE EVENT
+            Platform: {Platform}
+            Channel: {DisplayName}
+            Username: {Username}
+            Game: {GameName}
+            Title: {Title}
+            Viewers: {ViewerCount}
+            URL: {ChannelUrl}
+            StartedAt: {StartedAt}
+            DetectedAt: {DetectedAt}
+            """,
             liveEvent.Platform,
             liveEvent.DisplayName,
             liveEvent.Username,
@@ -219,7 +257,7 @@ public class StreamMonitorService : BackgroundService
     }
 
     private static string BuildChannelUrl(
-    StreamStatus status)
+        StreamStatus status)
     {
         return status.Platform switch
         {
@@ -249,9 +287,9 @@ public class StreamMonitorService : BackgroundService
         };
     }
 
-    private async Task<StreamStatus?> CheckChannelAsync(
-    StreamChannel channel,
-    CancellationToken cancellationToken)
+    private async Task<ChannelCheckResult?> CheckChannelAsync(
+        StreamChannel channel,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -271,7 +309,9 @@ public class StreamMonitorService : BackgroundService
                 channel.Username,
                 status.IsLive ? "LIVE" : "OFFLINE");
 
-            return status;
+            return new ChannelCheckResult(
+                channel.Id,
+                status);
         }
         catch (Exception ex)
         {

@@ -1,16 +1,21 @@
-﻿using ION.Core.Platforms;
-using ION.Core.Services;
+﻿using ION.App.Services;
+using ION.Core.Platforms;
 
 namespace ION.App.Pages;
 
 public partial class AddChannelPage : ContentPage
 {
+    private readonly IonApiClient _apiClient;
+
     private StreamingPlatform _detectedPlatform =
         StreamingPlatform.Unknown;
 
-    public AddChannelPage()
+    public AddChannelPage(
+        IonApiClient apiClient)
     {
         InitializeComponent();
+
+        _apiClient = apiClient;
     }
 
     private void OnChannelTextChanged(
@@ -59,7 +64,18 @@ public partial class AddChannelPage : ContentPage
             return;
         }
 
-        await ChannelStore.AddAsync(channel);
+        var added =
+    await _apiClient.AddChannelAsync(channel);
+
+        if (!added)
+        {
+            await DisplayAlertAsync(
+                "Could not add channel",
+                "ION could not add this channel. It may already exist or the server may be unavailable.",
+                "OK");
+
+            return;
+        }
 
         await Shell.Current.GoToAsync("..");
     }
